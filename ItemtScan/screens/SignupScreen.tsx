@@ -1,18 +1,24 @@
+import { router } from "expo-router";
 import React, { useState } from "react";
-import { Button, StyleSheet, Text, TextInput, View } from "react-native";
+import { Alert, Button, StyleSheet, Text, TextInput, View } from "react-native";
 
-type Props = {
-  onSignup: (name: string, email: string, password: string) => void;
-  onNavigateLogin: () => void;
-};
-
-export default function SignupForm({ onSignup, onNavigateLogin }: Props) {
+export default function SignupScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
 
+  const handleSignup = () => {
+    if (email && password && name) {
+      Alert.alert("Registracija", "Uspješno ste se registrirali!");
+      router.replace("/login");
+    } else {
+      Alert.alert("Greška", "Popunite sva polja");
+    }
+  };
+
   return (
-    <View>
+    <View style={styles.container}>
+      <Text style={styles.title}>Registracija</Text>
       <TextInput
         placeholder="Ime"
         value={name}
@@ -34,11 +40,8 @@ export default function SignupForm({ onSignup, onNavigateLogin }: Props) {
         secureTextEntry
         style={styles.input}
       />
-      <Button
-        title="Registriraj se"
-        onPress={() => onSignup(name, email, password)}
-      />
-      <Text style={styles.link} onPress={onNavigateLogin}>
+      <Button title="Registriraj se" onPress={handleSignup} />
+      <Text style={styles.link} onPress={() => router.push("/login")}>
         Već imaš račun? Prijavi se
       </Text>
     </View>
@@ -46,6 +49,13 @@ export default function SignupForm({ onSignup, onNavigateLogin }: Props) {
 }
 
 const styles = StyleSheet.create({
+  container: { flex: 1, justifyContent: "center", padding: 20 },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 24,
+    textAlign: "center",
+  },
   input: {
     borderWidth: 1,
     borderColor: "#ccc",
