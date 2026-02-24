@@ -4,5 +4,5 @@ This mobile app lets users scan product barcodes or items via camera to instantl
 
 Name | E-mail adresa (FOI) | Github korisničko ime
 ------------  | ------------------- | ----- 
-Leon Čugura | lcugura21@student.foi.hr | lcugura1
+Leon Čugura | leoncugura@gmail.com | lcugura1
 Karlo Jurič | karlojuric3@gmail.com | karlojuric
