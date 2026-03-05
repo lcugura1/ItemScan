@@ -1,2 +1,1 @@
-export { default } from "../screens/LoginScreen";
-
+export { default } from "../features/auth/components/LoginScreen";

@@ -1,2 +1,1 @@
-export { default } from "../screens/SignupScreen";
-
+export { default } from '../features/auth/components/SignupScreen';
