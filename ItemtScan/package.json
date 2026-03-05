@@ -1,5 +1,5 @@
 {
-  "name": "itemtscan",
+  "name": "itemscan",
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {

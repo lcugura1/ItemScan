@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "ItemtScan",
-    "slug": "ItemtScan",
+    "name": "ItemScan",
+    "slug": "ItemScan",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "itemtscan",
+    "scheme": "itemscan",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
