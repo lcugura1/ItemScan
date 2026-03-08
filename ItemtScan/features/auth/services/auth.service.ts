@@ -48,7 +48,12 @@ export const authService = {
   },
 
   logout: async () => {
-    await supabase.auth.signOut();
-    router.replace("/login");
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+    } catch (error: any) {
+    } finally {
+      router.replace("/login");
+    }
   },
 };
