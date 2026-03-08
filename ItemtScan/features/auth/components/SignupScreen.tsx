@@ -1,17 +1,30 @@
 import { router } from "expo-router";
 import { useState } from "react";
 import {
+  Alert,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+import { authService } from "../services/auth.service";
 
 export default function SignupScreen() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSignup = async () => {
+    if (!name || !email || !password) {
+      Alert.alert("Greška", "Popuni sva polja");
+      return;
+    }
+    setLoading(true);
+    await authService.signup({ email, password, fullName: name });
+    setLoading(false);
+  };
 
   return (
     <View style={styles.container}>
@@ -46,7 +59,8 @@ export default function SignupScreen() {
 
         <TouchableOpacity
           style={styles.buttonPrimary}
-          onPress={() => router.replace("/login")}
+          onPress={handleSignup}
+          disabled={loading}
         >
           <Text style={styles.buttonPrimaryText}>Registriraj se</Text>
         </TouchableOpacity>
