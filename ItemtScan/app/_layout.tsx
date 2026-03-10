@@ -7,7 +7,7 @@ export default function RootLayout() {
   useEffect(() => {
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((_e, session) => {
       if (!session) router.replace("/login");
     });
     return () => subscription.unsubscribe();
@@ -16,10 +16,8 @@ export default function RootLayout() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" />
-      <Stack.Screen name="login" />
-      <Stack.Screen name="signup" />
       <Stack.Screen name="(tabs)" />
-      <Stack.Screen name="auth/callback" />
+      <Stack.Screen name="auth" />
     </Stack>
   );
 }

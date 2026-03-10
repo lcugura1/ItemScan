@@ -9,18 +9,68 @@ import type {
   ProfileUpdate,
   SignupCredentials,
 } from "../types";
-// Ovo automatski detektira ispravan URL za emulator i fizički mobitel
+
 WebBrowser.maybeCompleteAuthSession();
+
 const REDIRECT_URL = makeRedirectUri({
   scheme: "itemscan",
   path: "auth/callback",
 });
 
+const handleOAuthResult = async (url: string): Promise<boolean> => {
+  const hashPart = url.includes("#") ? url.split("#")[1] : url.split("?")[1];
+  const params = new URLSearchParams(hashPart ?? "");
+  const access_token = params.get("access_token");
+  const refresh_token = params.get("refresh_token");
+
+  if (!access_token) return false;
+
+  await supabase.auth.setSession({
+    access_token,
+    refresh_token: refresh_token ?? "",
+  });
+  router.replace("/(tabs)");
+  return true;
+};
+
+const signInWithProvider = async (
+  provider: "google" | "apple",
+): Promise<boolean> => {
+  try {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: REDIRECT_URL,
+        skipBrowserRedirect: true,
+        queryParams: { prompt: "select_account" },
+      },
+    });
+
+    if (error) {
+      Alert.alert("Greška", error.message);
+      return false;
+    }
+    if (!data?.url) return false;
+
+    const result = await WebBrowser.openAuthSessionAsync(
+      data.url,
+      REDIRECT_URL,
+    );
+    if (result.type === "success" && result.url) {
+      return handleOAuthResult(result.url);
+    }
+    return false;
+  } catch (e: any) {
+    Alert.alert("Greška", e.message);
+    return false;
+  }
+};
+
 export const authService = {
-  login: async (credentials: LoginCredentials): Promise<boolean> => {
+  login: async ({ email, password }: LoginCredentials): Promise<boolean> => {
     const { error } = await supabase.auth.signInWithPassword({
-      email: credentials.email,
-      password: credentials.password,
+      email,
+      password,
     });
     if (error) {
       Alert.alert("Greška", error.message);
@@ -30,11 +80,15 @@ export const authService = {
     return true;
   },
 
-  signup: async (credentials: SignupCredentials): Promise<boolean> => {
+  signup: async ({
+    email,
+    password,
+    fullName,
+  }: SignupCredentials): Promise<boolean> => {
     const { error } = await supabase.auth.signUp({
-      email: credentials.email,
-      password: credentials.password,
-      options: { data: { full_name: credentials.fullName } },
+      email,
+      password,
+      options: { data: { full_name: fullName } },
     });
     if (error) {
       Alert.alert("Greška", error.message);
@@ -44,121 +98,19 @@ export const authService = {
     return true;
   },
 
-  logout: async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-    } catch (e: any) {
-    } finally {
-      router.replace("/login");
-    }
+  logout: async (): Promise<void> => {
+    await supabase.auth.signOut();
+    router.replace("/login");
   },
 
-  loginWithGoogle: async (): Promise<boolean> => {
-    try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: { redirectTo: REDIRECT_URL, skipBrowserRedirect: true },
-      });
-
-      if (error) {
-        Alert.alert("Google greška", error.message);
-        return false;
-      }
-
-      if (data?.url) {
-        const result = await WebBrowser.openAuthSessionAsync(
-          data.url,
-          REDIRECT_URL,
-        );
-
-        Alert.alert(
-          "Result",
-          JSON.stringify({
-            type: result.type,
-            url: "url" in result ? result.url?.substring(0, 80) : "none",
-          }),
-        );
-
-        if (result.type === "success" && result.url) {
-          const hashPart = result.url.includes("#")
-            ? result.url.split("#")[1]
-            : result.url.split("?")[1];
-
-          const params = new URLSearchParams(hashPart ?? "");
-          const access_token = params.get("access_token");
-          const refresh_token = params.get("refresh_token");
-
-          if (access_token) {
-            await supabase.auth.setSession({
-              access_token,
-              refresh_token: refresh_token ?? "",
-            });
-            router.replace("/(tabs)");
-            return true;
-          }
-        }
-      }
-      return false;
-    } catch (e: any) {
-      Alert.alert("Greška", e.message);
-      return false;
-    }
-  },
-
-  loginWithApple: async (): Promise<boolean> => {
-    try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: "apple",
-        options: { redirectTo: REDIRECT_URL, skipBrowserRedirect: true },
-      });
-
-      if (error) {
-        Alert.alert("Apple greška", error.message);
-        return false;
-      }
-
-      if (data?.url) {
-        const result = await WebBrowser.openAuthSessionAsync(
-          data.url,
-          REDIRECT_URL,
-        );
-
-        if (result.type === "success" && result.url) {
-          const hashPart = result.url.includes("#")
-            ? result.url.split("#")[1]
-            : result.url.split("?")[1];
-
-          const params = new URLSearchParams(hashPart ?? "");
-          const access_token = params.get("access_token");
-          const refresh_token = params.get("refresh_token");
-
-          if (access_token) {
-            await supabase.auth.setSession({
-              access_token,
-              refresh_token: refresh_token ?? "",
-            });
-            router.replace("/(tabs)");
-            return true;
-          }
-        }
-      }
-      return false;
-    } catch (e: any) {
-      Alert.alert("Apple greška", e.message);
-      return false;
-    }
-  },
+  loginWithGoogle: () => signInWithProvider("google"),
+  loginWithApple: () => signInWithProvider("apple"),
 
   getProfile: async (userId: string): Promise<Profile | null> => {
     const { data, error } = await supabase
       .from("profiles")
       .select(
-        `
-        id, email, display_name, full_name, avatar_url, phone,
-        auth_provider, email_confirmed, is_onboarded, locale, last_sign_in_at,
-        created_at, updated_at
-      `,
+        "id, email, display_name, full_name, avatar_url, auth_provider, email_confirmed, is_onboarded, locale, last_sign_in_at, created_at, updated_at",
       )
       .eq("id", userId)
       .maybeSingle();
@@ -180,6 +132,7 @@ export const authService = {
       .eq("id", userId)
       .select()
       .single();
+
     if (error) {
       console.error("updateProfile:", error.message);
       return null;
