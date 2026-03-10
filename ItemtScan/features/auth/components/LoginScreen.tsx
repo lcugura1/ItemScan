@@ -1,11 +1,6 @@
 import { router } from "expo-router";
 import { useState } from "react";
-import {
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View
-} from "react-native";
+import { Text, TextInput, TouchableOpacity, View } from "react-native";
 import { authService } from "../services/auth.service";
 import { authStyles as styles } from "../styles/auth.styles";
 
@@ -16,8 +11,13 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     setLoading(true);
-    await authService.login({ email, password });
-    setLoading(false);
+    try {
+      await authService.login({ email, password });
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -50,7 +50,7 @@ export default function LoginScreen() {
           disabled={loading}
         >
           <Text style={styles.buttonPrimaryText}>
-            {loading ? "Loging in..." : "Login"}
+            {loading ? "Prijava..." : "Prijavi se"}
           </Text>
         </TouchableOpacity>
 
@@ -61,6 +61,36 @@ export default function LoginScreen() {
           <Text style={styles.buttonSecondaryText}>
             Nemam račun → Registriraj se
           </Text>
+        </TouchableOpacity>
+
+        {/* --- Razdjelnik (Divider) --- */}
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            marginVertical: 16,
+          }}
+        >
+          <View style={{ flex: 1, height: 1, backgroundColor: "#333" }} />
+          <Text style={{ color: "#999", marginHorizontal: 12, fontSize: 12 }}>
+            ili nastavi s
+          </Text>
+          <View style={{ flex: 1, height: 1, backgroundColor: "#333" }} />
+        </View>
+
+        {/* --- Social Login Gumbi --- */}
+        <TouchableOpacity
+          style={[styles.buttonSecondary, { marginBottom: 8 }]}
+          onPress={() => authService.loginWithGoogle()}
+        >
+          <Text style={styles.buttonSecondaryText}>Nastavi s Googleom</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.buttonSecondary}
+          onPress={() => authService.loginWithApple()}
+        >
+          <Text style={styles.buttonSecondaryText}>Nastavi s Appleom</Text>
         </TouchableOpacity>
       </View>
     </View>
