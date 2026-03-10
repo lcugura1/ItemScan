@@ -1,7 +1,9 @@
 import { router } from "expo-router";
 import { useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Text, View } from "react-native";
+import Logo from "../../../assets/logo ItemScan.svg";
 import { useAuth } from "../hooks/useAuth";
+import { authStyles as styles } from "../styles/auth.styles";
 import { AuthButton } from "./ui/AuthButton";
 import { AuthInput } from "./ui/AuthInput";
 import { SocialLoginGroup } from "./ui/SocialLoginGroup";
@@ -13,10 +15,12 @@ export default function LoginScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.logo}>📱 ItemScan</Text>
-      <Text style={styles.subtitle}>Skeniraj. Usporedi. Uštedi.</Text>
+      <View style={styles.logoWrapper}>
+        <Logo width={200} height={200} />
+        <Text style={styles.subtitle}>Skeniraj. Usporedi. Uštedi.</Text>
+      </View>
 
-      <View style={styles.form}>
+      <View style={[styles.form, { width: "100%" }]}>
         <AuthInput
           placeholder="Email"
           value={email}
@@ -51,20 +55,3 @@ export default function LoginScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#0f0f0f",
-    justifyContent: "center",
-    padding: 24,
-  },
-  logo: { fontSize: 32, textAlign: "center", marginBottom: 8 },
-  subtitle: {
-    color: "#666",
-    textAlign: "center",
-    marginBottom: 32,
-    fontSize: 14,
-  },
-  form: { gap: 0 },
-});

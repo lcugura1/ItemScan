@@ -56,6 +56,5 @@ export function useProfile() {
     loading,
     error,
     updateProfile,
-    completeOnboarding: () => updateProfile({ is_onboarded: true }),
   };
 }

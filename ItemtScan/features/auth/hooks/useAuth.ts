@@ -1,14 +1,17 @@
 import { useState } from "react";
+import { Alert } from "react-native";
 import { authService } from "../services/auth.service";
 import type { LoginCredentials, SignupCredentials } from "../types";
 
 export function useAuth() {
   const [loading, setLoading] = useState(false);
 
-  const withLoading = async (fn: () => Promise<boolean>) => {
+  const withLoading = async (fn: () => Promise<void>) => {
     setLoading(true);
     try {
-      return await fn();
+      await fn();
+    } catch (e: any) {
+      Alert.alert("Greška", e.message);
     } finally {
       setLoading(false);
     }

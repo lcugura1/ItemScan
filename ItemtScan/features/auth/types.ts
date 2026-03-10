@@ -8,7 +8,6 @@ export interface Profile {
   avatar_url: string | null;
   auth_provider: AuthProvider;
   email_confirmed: boolean;
-  is_onboarded: boolean;
   locale: string;
   last_sign_in_at: string | null;
   created_at: string;
@@ -26,6 +25,4 @@ export interface SignupCredentials {
   fullName: string;
 }
 
-export type ProfileUpdate = Partial<
-  Pick<Profile, "full_name" | "avatar_url" | "locale" | "is_onboarded">
->;
+export type ProfileUpdate = Partial<"full_name" | "avatar_url" | "locale">;

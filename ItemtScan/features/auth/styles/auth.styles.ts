@@ -50,4 +50,15 @@ export const authStyles = StyleSheet.create({
     color: "#4f9eff",
     fontSize: 14,
   },
+  // Dodaj u StyleSheet.create({...})
+  logoContainer: {
+    alignItems: "center",
+    marginBottom: 48,
+  },
+  logoWrapper: {
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 24,
+  },
 });
