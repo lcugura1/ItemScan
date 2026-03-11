@@ -12,24 +12,10 @@ import type {
 WebBrowser.maybeCompleteAuthSession();
 
 const REDIRECT_URL = makeRedirectUri({
-  scheme: "itemscan",
-  path: "auth/callback",
+  native: "itemscan://auth/callback",
 });
 
-const handleOAuthResult = async (url: string): Promise<void> => {
-  const hashPart = url.includes("#") ? url.split("#")[1] : url.split("?")[1];
-  const params = new URLSearchParams(hashPart ?? "");
-  const access_token = params.get("access_token");
-  const refresh_token = params.get("refresh_token");
-
-  if (!access_token) throw new Error("OAuth nije vratio access token");
-
-  await supabase.auth.setSession({
-    access_token,
-    refresh_token: refresh_token ?? "",
-  });
-  router.replace("/(tabs)");
-};
+console.log("REDIRECT_URL:", REDIRECT_URL);
 
 const signInWithProvider = async (
   provider: "google" | "apple",
@@ -46,12 +32,19 @@ const signInWithProvider = async (
   if (error) throw new Error(error.message);
   if (!data?.url) throw new Error("OAuth nije vratio URL");
 
-  const result = await WebBrowser.openAuthSessionAsync(data.url, REDIRECT_URL);
+  const browserResult = await WebBrowser.openAuthSessionAsync(
+    data.url,
+    REDIRECT_URL,
+  );
 
-  if (result.type === "success" && result.url) {
-    await handleOAuthResult(result.url);
+  if (browserResult.type === "success" || browserResult.type === "dismiss") {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (session) {
+      router.replace("/(tabs)");
+    }
   }
-  // ako korisnik zatvori browser — tiho završi, nije greška
 };
 
 export const authService = {
