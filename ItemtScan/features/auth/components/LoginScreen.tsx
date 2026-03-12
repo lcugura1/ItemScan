@@ -1,7 +1,5 @@
-import { zodResolver } from "@hookform/resolvers/zod";
 import { router } from "expo-router";
 import { useRef } from "react";
-import { Controller, useForm } from "react-hook-form";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -12,28 +10,16 @@ import {
 } from "react-native";
 import Logo from "../../../assets/logo ItemScan.svg";
 import { useAuth } from "../hooks/useAuth";
-import { LoginForm, loginSchema } from "../validation/auth.validation";
+import { useLoginForm } from "../hooks/useLoginForm";
 import { loginStyles as styles } from "./LoginScreen.styles";
 import { AuthButton } from "./ui/AuthButton";
-import { AuthInput } from "./ui/AuthInput";
+import { AuthFormField } from "./ui/AuthFormField";
 import { SocialLoginGroup } from "./ui/SocialLoginGroup";
 
 export default function LoginScreen() {
-  const { loading, login, loginWithGoogle, loginWithApple } = useAuth();
+  const { control, errors, onSubmit, loading, serverError } = useLoginForm();
+  const { loginWithGoogle, loginWithApple } = useAuth();
   const passwordRef = useRef<TextInput>(null);
-
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LoginForm>({
-    resolver: zodResolver(loginSchema),
-    mode: "onBlur",
-  });
-
-  const onSubmit = (data: LoginForm) => {
-    login({ email: data.email, password: data.password });
-  };
 
   return (
     <KeyboardAvoidingView
@@ -51,67 +37,43 @@ export default function LoginScreen() {
           </View>
 
           <View style={styles.form}>
-            <Controller
+            <AuthFormField
               control={control}
               name="email"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <>
-                  <AuthInput
-                    placeholder="Email"
-                    value={value}
-                    onChangeText={onChange}
-                    onBlur={onBlur}
-                    keyboardType="email-address"
-                    returnKeyType="next"
-                    onSubmitEditing={() => passwordRef.current?.focus()}
-                  />
-                  {errors.email && (
-                    <Text style={styles.error}>{errors.email.message}</Text>
-                  )}
-                </>
-              )}
+              error={errors.email}
+              placeholder="Email"
+              keyboardType="email-address"
+              returnKeyType="next"
+              onSubmitEditing={() => passwordRef.current?.focus()}
             />
-
-            <Controller
+            <AuthFormField
+              ref={passwordRef}
               control={control}
               name="password"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <>
-                  <AuthInput
-                    ref={passwordRef}
-                    placeholder="Lozinka"
-                    value={value}
-                    onChangeText={onChange}
-                    onBlur={onBlur}
-                    secureTextEntry
-                    returnKeyType="done"
-                    onSubmitEditing={handleSubmit(onSubmit)}
-                  />
-                  {errors.password && (
-                    <Text style={styles.error}>{errors.password.message}</Text>
-                  )}
-                </>
-              )}
+              error={errors.password}
+              placeholder="Lozinka"
+              secureTextEntry
+              returnKeyType="done"
+              onSubmitEditing={onSubmit}
             />
+
+            {serverError && <Text style={styles.error}>{serverError}</Text>}
 
             <AuthButton
               label={loading ? "Prijava..." : "Prijavi se"}
               loading={loading}
-              onPress={handleSubmit(onSubmit)}
+              onPress={onSubmit}
             />
-
             <AuthButton
               label="Nemam račun → Registriraj se"
               variant="secondary"
               onPress={() => router.push("/signup")}
             />
-
             <AuthButton
               label="Zaboravio sam lozinku"
               variant="secondary"
               onPress={() => router.push("/forgot-password")}
             />
-
             <SocialLoginGroup
               loading={loading}
               providers={[

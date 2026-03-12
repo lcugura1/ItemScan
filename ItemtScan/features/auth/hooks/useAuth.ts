@@ -3,27 +3,35 @@ import { Alert } from "react-native";
 import { authService } from "../services/auth.service";
 import type { LoginCredentials, SignupCredentials } from "../types";
 
+type ErrorHandler = ((msg: string) => void) | undefined;
+
 export function useAuth() {
   const [loading, setLoading] = useState(false);
 
-  const withLoading = useCallback(async (fn: () => Promise<void>) => {
-    setLoading(true);
-    try {
-      await fn();
-    } catch (e: any) {
-      Alert.alert("Greška", e.message);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const withLoading = useCallback(
+    async (fn: () => Promise<void>, onError?: ErrorHandler) => {
+      setLoading(true);
+      try {
+        await fn();
+      } catch (e: any) {
+        if (onError) onError(e.message);
+        else Alert.alert("Greška", e.message);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [],
+  );
 
   const login = useCallback(
-    (creds: LoginCredentials) => withLoading(() => authService.login(creds)),
+    (creds: LoginCredentials, onError?: ErrorHandler) =>
+      withLoading(() => authService.login(creds), onError),
     [withLoading],
   );
 
   const signup = useCallback(
-    (creds: SignupCredentials) => withLoading(() => authService.signup(creds)),
+    (creds: SignupCredentials, onError?: ErrorHandler) =>
+      withLoading(() => authService.signup(creds), onError),
     [withLoading],
   );
 

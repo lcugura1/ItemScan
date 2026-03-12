@@ -3,12 +3,12 @@ import { forwardRef } from "react";
 import { TextInput, TextInputProps } from "react-native";
 import { authInputStyles as styles } from "./AuthInput.styles";
 
-interface Props extends TextInputProps {
+export interface AuthInputProps extends TextInputProps {
   value: string;
   onChangeText: (text: string) => void;
 }
 
-export const AuthInput = forwardRef<TextInput, Props>(
+export const AuthInput = forwardRef<TextInput, AuthInputProps>(
   ({ style, ...props }, ref) => {
     return (
       <TextInput
