@@ -25,4 +25,6 @@ export interface SignupCredentials {
   fullName: string;
 }
 
-export type ProfileUpdate = Partial<"full_name" | "avatar_url" | "locale">;
+export type ProfileUpdate = Partial<
+  Pick<Profile, "full_name" | "avatar_url" | "locale">
+>;

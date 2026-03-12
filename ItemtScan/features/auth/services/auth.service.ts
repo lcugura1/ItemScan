@@ -1,4 +1,5 @@
 import { supabase } from "@/shared/libs/supabase";
+import { sanitize } from "@/shared/utils/sanitize";
 import { makeRedirectUri } from "expo-auth-session";
 import { router } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
@@ -14,8 +15,6 @@ WebBrowser.maybeCompleteAuthSession();
 const REDIRECT_URL = makeRedirectUri({
   native: "itemscan://auth/callback",
 });
-
-console.log("REDIRECT_URL:", REDIRECT_URL);
 
 const signInWithProvider = async (
   provider: "google" | "apple",
@@ -50,8 +49,8 @@ const signInWithProvider = async (
 export const authService = {
   login: async ({ email, password }: LoginCredentials): Promise<void> => {
     const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
+      email: sanitize.email(email),
+      password: sanitize.password(password),
     });
     if (error) throw new Error(error.message);
     router.replace("/(tabs)");
@@ -63,9 +62,9 @@ export const authService = {
     fullName,
   }: SignupCredentials): Promise<void> => {
     const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { data: { full_name: fullName } },
+      email: sanitize.email(email),
+      password: sanitize.password(password),
+      options: { data: { full_name: sanitize.name(fullName) } },
     });
     if (error) throw new Error(error.message);
     router.replace("/login");
@@ -73,7 +72,14 @@ export const authService = {
 
   logout: async (): Promise<void> => {
     await supabase.auth.signOut();
-    router.replace("/login");
+  },
+
+  resetPassword: async (email: string): Promise<void> => {
+    const { error } = await supabase.auth.resetPasswordForEmail(
+      sanitize.email(email),
+      { redirectTo: "itemscan://auth/callback" },
+    );
+    if (error) throw new Error(error.message);
   },
 
   loginWithGoogle: () => signInWithProvider("google"),

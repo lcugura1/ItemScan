@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import * as SecureStore from "expo-secure-store";
 import "react-native-url-polyfill/auto";
+import { z } from "zod";
 
 const ExpoSecureStoreAdapter = {
   getItem: async (key: string) => {
@@ -14,18 +15,29 @@ const ExpoSecureStoreAdapter = {
   },
 };
 
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL as string;
-const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY as string;
+const env = z
+  .object({
+    EXPO_PUBLIC_SUPABASE_URL: z
+      .string()
+      .url("EXPO_PUBLIC_SUPABASE_URL mora biti valjan URL"),
+    EXPO_PUBLIC_SUPABASE_ANON_KEY: z
+      .string()
+      .min(1, "EXPO_PUBLIC_SUPABASE_ANON_KEY je obavezan"),
+  })
+  .parse({
+    EXPO_PUBLIC_SUPABASE_URL: process.env.EXPO_PUBLIC_SUPABASE_URL,
+    EXPO_PUBLIC_SUPABASE_ANON_KEY: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
+  });
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error("Missing Supabase environment variables");
-}
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    storage: ExpoSecureStoreAdapter,
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: false,
+export const supabase = createClient(
+  env.EXPO_PUBLIC_SUPABASE_URL,
+  env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
+  {
+    auth: {
+      storage: ExpoSecureStoreAdapter,
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: false,
+    },
   },
-});
+);

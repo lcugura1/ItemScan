@@ -1,21 +1,16 @@
+import { colors } from "@/shared/constants/theme";
 import { useSession } from "@/shared/hooks/useSession";
 import { Redirect } from "expo-router";
 import { ActivityIndicator, View } from "react-native";
+import { styles } from "./index.styles";
 
 export default function Index() {
   const { session } = useSession();
 
   if (session === undefined) {
     return (
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: "#0f0f0f",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <ActivityIndicator color="#4f9eff" />
+      <View style={styles.loading}>
+        <ActivityIndicator color={colors.accent} />
       </View>
     );
   }

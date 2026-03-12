@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { Alert } from "react-native";
 import { authService } from "../services/auth.service";
 import type { LoginCredentials, SignupCredentials } from "../types";
@@ -6,7 +6,7 @@ import type { LoginCredentials, SignupCredentials } from "../types";
 export function useAuth() {
   const [loading, setLoading] = useState(false);
 
-  const withLoading = async (fn: () => Promise<void>) => {
+  const withLoading = useCallback(async (fn: () => Promise<void>) => {
     setLoading(true);
     try {
       await fn();
@@ -15,16 +15,29 @@ export function useAuth() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  return {
-    loading,
-    login: (creds: LoginCredentials) =>
-      withLoading(() => authService.login(creds)),
-    signup: (creds: SignupCredentials) =>
-      withLoading(() => authService.signup(creds)),
-    loginWithGoogle: () => withLoading(() => authService.loginWithGoogle()),
-    loginWithApple: () => withLoading(() => authService.loginWithApple()),
-    logout: () => authService.logout(),
-  };
+  const login = useCallback(
+    (creds: LoginCredentials) => withLoading(() => authService.login(creds)),
+    [withLoading],
+  );
+
+  const signup = useCallback(
+    (creds: SignupCredentials) => withLoading(() => authService.signup(creds)),
+    [withLoading],
+  );
+
+  const loginWithGoogle = useCallback(
+    () => withLoading(() => authService.loginWithGoogle()),
+    [withLoading],
+  );
+
+  const loginWithApple = useCallback(
+    () => withLoading(() => authService.loginWithApple()),
+    [withLoading],
+  );
+
+  const logout = useCallback(() => authService.logout(), []);
+
+  return { loading, login, signup, loginWithGoogle, loginWithApple, logout };
 }

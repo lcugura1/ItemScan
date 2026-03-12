@@ -1,10 +1,12 @@
+import { colors } from "@/shared/constants/theme";
+import * as Haptics from "expo-haptics";
 import {
-    ActivityIndicator,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    TouchableOpacityProps,
+  ActivityIndicator,
+  Text,
+  TouchableOpacity,
+  TouchableOpacityProps,
 } from "react-native";
+import { authButtonStyles as styles } from "./AuthButton.styles";
 
 interface Props extends TouchableOpacityProps {
   label: string;
@@ -17,8 +19,15 @@ export function AuthButton({
   loading = false,
   variant = "primary",
   style,
+  onPress,
   ...props
 }: Props) {
+  const handlePress: typeof onPress = (e) => {
+    // Haptic ne treba await — fire and forget
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    onPress?.(e);
+  };
+
   return (
     <TouchableOpacity
       style={[
@@ -28,10 +37,13 @@ export function AuthButton({
         style,
       ]}
       disabled={loading}
+      onPress={handlePress}
       {...props}
     >
       {loading ? (
-        <ActivityIndicator color={variant === "primary" ? "#fff" : "#4f9eff"} />
+        <ActivityIndicator
+          color={variant === "primary" ? colors.textPrimary : colors.accent}
+        />
       ) : (
         <Text
           style={
@@ -44,21 +56,3 @@ export function AuthButton({
     </TouchableOpacity>
   );
 }
-
-const styles = StyleSheet.create({
-  base: {
-    borderRadius: 10,
-    paddingVertical: 14,
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  primary: { backgroundColor: "#4f9eff" },
-  secondary: {
-    backgroundColor: "transparent",
-    borderWidth: 1,
-    borderColor: "#333",
-  },
-  disabled: { opacity: 0.6 },
-  labelPrimary: { color: "#fff", fontSize: 15, fontWeight: "600" },
-  labelSecondary: { color: "#aaa", fontSize: 15 },
-});

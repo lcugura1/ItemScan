@@ -1,3 +1,4 @@
+import { ErrorBoundary } from "@/shared/components/ErrorBoundary";
 import { supabase } from "@/shared/libs/supabase";
 import { router, Stack } from "expo-router";
 import { useEffect } from "react";
@@ -11,18 +12,27 @@ export default function RootLayout() {
       if (event === "SIGNED_OUT") {
         router.replace("/login");
       }
+      if (event === "SIGNED_IN") {
+        router.replace("/(tabs)");
+      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="index" />
-      <Stack.Screen name="(tabs)" />
-      <Stack.Screen name="auth/callback" />
-      <Stack.Screen name="login" />
-      <Stack.Screen name="signup" />
-    </Stack>
+    <ErrorBoundary>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="index" />
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="auth/callback" />
+        <Stack.Screen name="login" />
+        <Stack.Screen name="signup" />
+        <Stack.Screen
+          name="forgot-password"
+          options={{ headerShown: true, title: "Reset lozinke" }}
+        />
+      </Stack>
+    </ErrorBoundary>
   );
 }

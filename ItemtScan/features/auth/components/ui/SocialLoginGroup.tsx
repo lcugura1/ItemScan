@@ -1,13 +1,19 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import { AuthButton } from "./AuthButton";
+import { socialLoginGroupStyles as styles } from "./SocialLoginGroup.styles";
+
+interface SocialProvider {
+  key: string;
+  label: string;
+  onPress: () => void;
+}
 
 interface Props {
   loading: boolean;
-  onGoogle: () => void;
-  onApple: () => void;
+  providers: SocialProvider[];
 }
 
-export function SocialLoginGroup({ loading, onGoogle, onApple }: Props) {
+export function SocialLoginGroup({ loading, providers }: Props) {
   return (
     <>
       <View style={styles.divider}>
@@ -15,24 +21,16 @@ export function SocialLoginGroup({ loading, onGoogle, onApple }: Props) {
         <Text style={styles.dividerText}>ili nastavi s</Text>
         <View style={styles.line} />
       </View>
-      <AuthButton
-        label="Nastavi s Googleom"
-        variant="secondary"
-        loading={loading}
-        onPress={onGoogle}
-      />
-      <AuthButton
-        label="Nastavi s Appleom"
-        variant="secondary"
-        loading={loading}
-        onPress={onApple}
-      />
+
+      {providers.map((provider) => (
+        <AuthButton
+          key={provider.key}
+          label={provider.label}
+          variant="secondary"
+          loading={loading}
+          onPress={provider.onPress}
+        />
+      ))}
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  divider: { flexDirection: "row", alignItems: "center", marginVertical: 16 },
-  line: { flex: 1, height: 1, backgroundColor: "#333" },
-  dividerText: { color: "#666", marginHorizontal: 12, fontSize: 12 },
-});
