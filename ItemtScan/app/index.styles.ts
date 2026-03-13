@@ -2,10 +2,12 @@ import { colors } from "@/shared/constants/theme";
 import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
-  loading: {
+  container: {
     flex: 1,
     backgroundColor: colors.bg,
-    justifyContent: "center",
-    alignItems: "center",
+  },
+  animation: {
+    width: "100%",
+    height: "100%",
   },
 });

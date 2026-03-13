@@ -1,4 +1,5 @@
 import { ErrorBoundary } from "@/shared/components/ErrorBoundary";
+import { colors } from "@/shared/constants/theme";
 import { supabase } from "@/shared/libs/supabase";
 import { router, Stack } from "expo-router";
 import { useEffect } from "react";
@@ -15,6 +16,12 @@ export default function RootLayout() {
       if (event === "SIGNED_IN") {
         router.replace("/(tabs)");
       }
+      if (event === "TOKEN_REFRESHED" && !session) {
+        router.replace("/login");
+      }
+      if (event === "USER_UPDATED" && !session) {
+        router.replace("/login");
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -22,7 +29,12 @@ export default function RootLayout() {
 
   return (
     <ErrorBoundary>
-      <Stack screenOptions={{ headerShown: false }}>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: colors.bg },
+        }}
+      >
         <Stack.Screen name="index" />
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="auth/callback" />
