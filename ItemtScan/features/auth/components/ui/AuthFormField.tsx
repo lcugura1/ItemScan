@@ -1,9 +1,9 @@
 import { forwardRef } from "react";
 import type {
-    Control,
-    FieldError,
-    FieldPath,
-    FieldValues,
+  Control,
+  FieldError,
+  FieldPath,
+  FieldValues,
 } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import { Text, TextInput } from "react-native";
